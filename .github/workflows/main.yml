@@ -1,0 +1,42 @@
+name: Compiler SERVICE PACHA PRO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
+
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extraire le projet Android
+        run: |
+          unzip -q service-pacha-pro-android.zip -d projet
+          echo "Contenu extrait :"
+          find projet -name gradlew -type f
+
+      - name: Compiler l'application
+        run: |
+          GRADLEW=$(find projet -name gradlew -type f | head -n 1)
+          if [ -z "$GRADLEW" ]; then
+            echo "Fichier gradlew introuvable"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          chmod +x "$GRADLEW"
+          cd "$PROJECT_DIR"
+          ./gradlew assembleDebug
+
+      - name: Récupérer le fichier APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SERVICE-PACHA-PRO-APK
+          path: projet/**/app/build/outputs/apk/debug/*.apk
