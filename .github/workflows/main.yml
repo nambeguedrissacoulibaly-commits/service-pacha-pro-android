@@ -21,15 +21,17 @@ jobs:
       - name: Extraire le projet Android
         run: |
           unzip -q service-pacha-pro-android.zip -d projet
-          find projet -name gradlew -type f
+          ls -R projet | head -n 100
 
       - name: Compiler l'application
         run: |
-          GRADLEW=$(find projet -name gradlew -type f | head -n 1)
-          PROJECT_DIR=$(dirname "$GRADLEW")
+          GRADLEW_PATH=$(find projet -name gradlew -type f | head -n 1)
+          echo "Gradlew trouve a: $GRADLEW_PATH"
+          chmod +x "$GRADLEW_PATH"
+          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
           cd "$PROJECT_DIR"
           chmod +x gradlew
-          ./gradlew assembleDebug
+          bash ./gradlew assembleDebug
 
       - name: Recuperer le fichier APK
         uses: actions/upload-artifact@v4
