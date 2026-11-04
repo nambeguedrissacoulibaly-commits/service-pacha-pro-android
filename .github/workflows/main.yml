@@ -10,32 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-      - uses: gradle/gradle-build-action@v3
 
-      - name: Extraire et Compiler
+      - name: Extraire et Compiler sans gradlew
         run: |
           ls -la
           rm -rf projet
           unzip -o service-pacha-pro-android.zip -d projet
-          GRADLEW=$(find projet -name gradlew -type f | head -n 1)
-          echo "Trouve: $GRADLEW"
-          ls -R projet
-          if [ -z "$GRADLEW" ]; then
-            echo "gradlew non trouve, compilation avec gradle directement"
-            APP_DIR=$(find projet -name "build.gradle*" | head -n 1 | xargs dirname)
-            echo "Dossier app: $APP_DIR"
-            cd "$APP_DIR"
-            gradle assembleDebug
-          else
-            DIR=$(dirname "$GRADLEW")
-            cd "$DIR"
-            chmod +x gradlew
-            bash ./gradlew assembleDebug
+          echo "--- CONTENU RACINE DU PROJET ---"
+          ls -la projet
+          # Chercher le dossier qui contient settings.gradle
+          ROOT=$(find projet -name "settings.gradle*" | head -n 1 | xargs dirname)
+          if [ -z "$ROOT" ]; then
+            ROOT=$(find projet -name "build.gradle*" | head -n 1 | xargs dirname)
+            ROOT=$(dirname "$ROOT")
           fi
+          echo "Dossier racine trouve: $ROOT"
+          cd "$ROOT"
+          pwd
+          ls -la
+          gradle assembleDebug --no-daemon
 
       - name: Recuperer APK
         uses: actions/upload-artifact@v4
