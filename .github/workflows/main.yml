@@ -16,24 +16,16 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Extraire et Compiler sans gradlew
+      - name: Extraire et Compiler avec le bon Gradle
         run: |
-          ls -la
           rm -rf projet
           unzip -o service-pacha-pro-android.zip -d projet
-          echo "--- CONTENU RACINE DU PROJET ---"
-          ls -la projet
-          # Chercher le dossier qui contient settings.gradle
           ROOT=$(find projet -name "settings.gradle*" | head -n 1 | xargs dirname)
-          if [ -z "$ROOT" ]; then
-            ROOT=$(find projet -name "build.gradle*" | head -n 1 | xargs dirname)
-            ROOT=$(dirname "$ROOT")
-          fi
-          echo "Dossier racine trouve: $ROOT"
+          echo "Racine: $ROOT"
           cd "$ROOT"
-          pwd
           ls -la
-          gradle assembleDebug --no-daemon
+          chmod +x gradlew
+          bash ./gradlew assembleDebug --no-daemon
 
       - name: Recuperer APK
         uses: actions/upload-artifact@v4
