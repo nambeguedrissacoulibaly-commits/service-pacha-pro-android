@@ -1,16 +1,13 @@
-name: Compiler SERVICE PACHA PRO
+name: Service de compilation PACHA PRO
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -23,8 +20,11 @@ jobs:
           ROOT=$(find projet -name "settings.gradle*" | head -n 1 | xargs dirname)
           echo "Racine: $ROOT"
           cd "$ROOT"
-          ls -la
+          echo "--- Reparation gradlew ---"
+          sed -i 's/\r$//' gradlew
           chmod +x gradlew
+          ls -la
+          cat gradle/wrapper/gradle-wrapper.properties
           bash ./gradlew assembleDebug --no-daemon
 
       - name: Recuperer APK
